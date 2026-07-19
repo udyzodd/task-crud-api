@@ -1,6 +1,6 @@
 # Task API
 
-A simple in-memory CRUD API for managing a to-do list, built with Node.js and Express as part of the FlyRank Backend Internship (Week 2, Assignment A1). Supports full Create, Read, Update, and Delete operations on tasks, with interactive API docs via Swagger UI.
+A simple in-memory CRUD API for managing a to-do list, built with Node.js and Express. Supports full Create, Read, Update, and Delete operations on tasks, with interactive API docs via Swagger UI.
 
 ## Install & Run
 
