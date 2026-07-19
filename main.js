@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+app.use(express.json());
+
 let tasks = [
     { id: 1, title: "Buy milk", done: false },
     { id: 2, title: "Walk the dog", done: true },
@@ -31,6 +33,19 @@ app.get('/tasks/:id', (req, res) => {
         return res.status(404).json({ error: `Task ${id} not found` });
     }
     res.status(200).json(task);
+});
+
+app.post('/tasks', (req, res) => {
+    const task = req.body;
+
+    if (!task.title || typeof task.title !== 'string' || task.title.trim() === '') {
+        return res.status(400).json({ error: 'Title is required' });
+    }
+
+    task.done = false;
+    task.id = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+    tasks.push(task);
+    res.status(201).json(task);
 });
 
 app.listen(3000, () => {
