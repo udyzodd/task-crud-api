@@ -1,6 +1,6 @@
 # Task API
 
-A CRUD API for managing a to-do list, built with Node.js and Express as part of the FlyRank Backend Internship. Started as an in-memory API and now persists data to a SQLite database. Supports full Create, Read, Update, and Delete operations on tasks, with interactive API docs via Swagger UI.
+A simple in-memory CRUD API for managing a to-do list, built with Node.js and Express as part of the FlyRank Backend Internship (Week 2, Assignment A1). Supports full Create, Read, Update, and Delete operations on tasks, with interactive API docs via Swagger UI.
 
 ## Install & Run
 
@@ -59,6 +59,7 @@ SELECT COUNT(*) FROM tasks;
 Returned `4` — confirming the 3 seeded tasks plus one I'd created via `POST` were all persisted correctly.
 
 - `title` is required on both create (`POST`) and update (`PUT`); a missing or empty title returns `400`.
+
 - All queries use parameterized placeholders (`?`) to prevent SQL injection.
   
   ## Working Screenshot
@@ -69,4 +70,4 @@ Returned `4` — confirming the 3 seeded tasks plus one I'd created via `POST` w
 
 ## Database Screenshot
 
-![DB Browser screenshot](./db-browser-screenshot.png)
+![Swagger UI screenshot](db-browser-screenshot.png)
