@@ -13,7 +13,7 @@ let tasks = [
     { id: 2, title: "Walk the dog", done: true },
     { id: 3, title: "Finish assignment", done: false }
 ];
-
+// main
 app.get('/', (req, res) => {
     res.status(200).json({
         name: "Task API",
@@ -21,16 +21,16 @@ app.get('/', (req, res) => {
         endpoints: ["/tasks"]
     });
 });
-
+// health
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok' });
 });
-
+// tasks
 app.get('/tasks', (req, res) => {
     const tasks = db.prepare('select * from tasks;').all();
     res.status(200).json(tasks);
 });
-
+// task by id
 app.get('/tasks/:id', (req, res) => {
     const id = Number(req.params.id);
     const task = db.prepare('select * from tasks where id = ?').get(id);
@@ -41,19 +41,20 @@ app.get('/tasks/:id', (req, res) => {
     res.status(200).json(task);
 });
 
+// post task
 app.post('/tasks', (req, res) => {
     const task = req.body;
 
     if (!task.title || typeof task.title !== 'string' || task.title.trim() === '') {
         return res.status(400).json({ error: 'Title is required' });
     }
-
-    task.done = false;
-    task.id = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
-    tasks.push(task);
-    res.status(201).json(task);
+    const insert = db.prepare('insert into tasks (title, done) values (?, ?)');
+    const result  = insert.run(task.title, 0);
+    const newTask = db.prepare('select * from tasks where id = ?').get(result.lastInsertRowid);
+    res.status(201).json(newTask);
 });
 
+// update task
 app.put('/tasks/:id', (req, res) => {
     const id = Number(req.params.id);
     const exists = tasks.find(t => t.id === id);
@@ -72,6 +73,7 @@ app.put('/tasks/:id', (req, res) => {
     res.status(200).json(task);
 });
 
+// delete task
 app.delete('/tasks/:id', (req, res) => {
     const id = Number(req.params.id);
     const exists = tasks.find(t => t.id === id);
