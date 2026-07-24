@@ -67,7 +67,6 @@ Returned `4` — confirming the 3 seeded tasks plus one I'd created via `POST` w
 ![Swagger UI screenshot](swagger-ui-screenshot.png)
 
 
-
 ## Database Screenshot
 
 ![Swagger UI screenshot](db-browser-screenshot.png)
