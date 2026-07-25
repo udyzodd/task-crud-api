@@ -1,3 +1,5 @@
+.idea/
 node_modules/
 tasks.db
-.idea/
+tasks.db-journal
+.env
