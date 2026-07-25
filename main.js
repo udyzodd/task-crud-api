@@ -1,5 +1,12 @@
 
-const db = require('./db');
+const { pool, init } = require('./db');
+
+init().then(() => {
+    app.listen(3000, () => console.log('Server running on port 3000'));
+}).catch(err => {
+    console.error('Failed to initialize database:', err);
+});
+
 const express = require('express');
 const app = express();
 const swaggerUi = require('swagger-ui-express');
@@ -49,7 +56,7 @@ app.post('/tasks', (req, res) => {
         return res.status(400).json({ error: 'Title is required' });
     }
     const insert = db.prepare('insert into tasks (title, done) values (?, ?)');
-    const result  = insert.run(task.title, 0);
+    const result = insert.run(task.title, 0);
     const newTask = db.prepare('select * from tasks where id = ?').get(result.lastInsertRowid);
     res.status(201).json(newTask);
 });
@@ -66,7 +73,7 @@ app.put('/tasks/:id', (req, res) => {
     const update = db.prepare('update tasks set title = ?, done = ? where id = ?');
     const result = update.run(task.title, doneValue, id);
 
-    if(result.changes === 0) { // no rows affected = task not found
+    if (result.changes === 0) { // no rows affected = task not found
         return res.status(404).json({ error: `Task ${id} not found` });
     }
     const updatedTasks = db.prepare('select * from tasks where id = ? ').get(id);
@@ -78,10 +85,10 @@ app.delete('/tasks/:id', (req, res) => {
     const id = Number(req.params.id);
 
     const deleteStmt = db.prepare('delete from tasks where id = ?');
-    const result = deleteStmt.run(id);  
+    const result = deleteStmt.run(id);
 
-    if(result.changes === 0) {
-        return res.status(404).json({error: `Task ${id} not found`});
+    if (result.changes === 0) {
+        return res.status(404).json({ error: `Task ${id} not found` });
     }
     res.status(204).send();
 });
@@ -90,6 +97,3 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Not found' });
 });
 
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
-});
