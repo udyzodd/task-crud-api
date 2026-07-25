@@ -83,3 +83,5 @@ Tested: created tasks, tore the whole stack down, brought it back up — same ro
   confirmed ready.
 
 ## Database screenshot
+
+![Database screenshot](db-screenshot.png)
