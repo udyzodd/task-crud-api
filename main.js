@@ -49,20 +49,18 @@ app.get('/tasks/:id', async (req, res) => {
 });
 
 // post task
-app.post('/tasks', (req, res) => {
+app.post('/tasks', async (req, res) => {
     const task = req.body;
 
     if (!task.title || typeof task.title !== 'string' || task.title.trim() === '') {
         return res.status(400).json({ error: 'Title is required' });
     }
-    const insert = db.prepare('insert into tasks (title, done) values (?, ?)');
-    const result = insert.run(task.title, 0);
-    const newTask = db.prepare('select * from tasks where id = ?').get(result.lastInsertRowid);
-    res.status(201).json(newTask);
+    const { rows } = await pool.query(`INSERT INTO tasks (title, done) VALUES ($1, $2) RETURNING *`, [task.title, false]);
+    res.status(201).json(rows[0]);
 });
 
 // put(update) task
-app.put('/tasks/:id', (req, res) => {
+app.put('/tasks/:id', async (req, res) => {
     const id = Number(req.params.id);
     const task = req.body;
 
@@ -70,24 +68,19 @@ app.put('/tasks/:id', (req, res) => {
         return res.status(400).json({ error: 'Title is required' });
     }
     const doneValue = task.done ? 1 : 0;
-    const update = db.prepare('update tasks set title = ?, done = ? where id = ?');
-    const result = update.run(task.title, doneValue, id);
-
-    if (result.changes === 0) { // no rows affected = task not found
-        return res.status(404).json({ error: `Task ${id} not found` });
+    const { rows } = await pool.query(`UPDATE tasks SET title = $1, done = $2 WHERE id = $3 RETURNING *`, [task.title, doneValue, id]);
+    if (rows.length === 0) {
+        return res.status(404).json({ error: `Tasks ${id} not found` });
     }
-    const updatedTasks = db.prepare('select * from tasks where id = ? ').get(id);
-    res.status(200).json(updatedTasks);
+    res.status(200).json(rows[0]);
 });
 
 // delete task
-app.delete('/tasks/:id', (req, res) => {
+app.delete('/tasks/:id', async (req, res) => {
     const id = Number(req.params.id);
 
-    const deleteStmt = db.prepare('delete from tasks where id = ?');
-    const result = deleteStmt.run(id);
-
-    if (result.changes === 0) {
+    const { rows } = await pool.query(`DELETE FROM tasks WHERE id = $1 RETURNING *`, [id]);
+    if (rows.length === 0) {
         return res.status(404).json({ error: `Task ${id} not found` });
     }
     res.status(204).send();
