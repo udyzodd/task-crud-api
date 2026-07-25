@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Task CRUD API
 
 A task management REST API built across three assignments:
@@ -12,19 +11,12 @@ The API itself never changed across all three — only the storage underneath.
 
 ## Run it
 
-=======
-# Task API
-A CRUD API for managing a to-do list, built with Node.js and Express, backed by a SQLite database for persistence. Supports full Create, Read, Update, and Delete operations on tasks, with interactive API docs via Swagger UI.
-
-## Install & Run
->>>>>>> 2d4ecea8920ba3cfc65ba2f0450f23dd3b693e9e
 ```bash
 git clone https://github.com/udyzodd/task-crud-api.git
 cd task-crud-api
 cp .env.example .env
 docker compose up
 ```
-<<<<<<< HEAD
 
 The API will be available at `http://localhost:3000`.
 
@@ -40,38 +32,19 @@ DATABASE_URL=postgres://postgres:dev@db:5432/tasks
 
 ## Endpoints
 
-| Method | Path       | Description       | Success | Errors   |
-| ------ | ---------- | ----------------- | ------- | -------- |
-| GET    | /tasks     | List all tasks    | 200     | —        |
-| GET    | /tasks/:id | Get a single task | 200     | 404      |
-| POST   | /tasks     | Create a task     | 201     | 400      |
-| PUT    | /tasks/:id | Update a task     | 200     | 400, 404 |
-| DELETE | /tasks/:id | Delete a task     | 204     | 404      |
+| Method | Path | Description | Success | Errors |
+| --- | --- | --- | --- | --- |
+| GET | /tasks | List all tasks | 200 | —   |
+| GET | /tasks/:id | Get a single task | 200 | 404 |
+| POST | /tasks | Create a task | 201 | 400 |
+| PUT | /tasks/:id | Update a task | 200 | 400, 404 |
+| DELETE | /tasks/:id | Delete a task | 204 | 404 |
 
 ## Example
 
-=======
-The server starts on `http://localhost:3000`.
-
-## Endpoints
-| Method | Path         | Description             |
-| ------ | ------------ | ----------------------- |
-| GET    | `/`          | API info                |
-| GET    | `/health`    | Health check            |
-| GET    | `/tasks`     | List all tasks          |
-| GET    | `/tasks/:id` | Get a single task by id |
-| POST   | `/tasks`     | Create a new task       |
-| PUT    | `/tasks/:id` | Update a task by id     |
-| DELETE | `/tasks/:id` | Delete a task by id     |
-
-## Example Request
->>>>>>> 2d4ecea8920ba3cfc65ba2f0450f23dd3b693e9e
 ```bash
 curl -i http://localhost:3000/tasks
 ```
-
-<<<<<<< HEAD
-
 
 ```
 HTTP/1.1 200 OK
@@ -110,40 +83,3 @@ Tested: created tasks, tore the whole stack down, brought it back up — same ro
   confirmed ready.
 
 ## Database screenshot
-
-<img src="./db-screenshot.png" title="" alt="tasks table in Postgres" width="672">
-=======
-## Swagger UI
-Interactive API docs are available at `http://localhost:3000/docs` once the server is running. Every endpoint can be tested directly from the page via "Try it out."
-
-## Status Codes
-| Code | Meaning                    |
-| ---- | -------------------------- |
-| 200  | Successful read/update     |
-| 201  | Task created               |
-| 204  | Task deleted               |
-| 400  | Invalid or missing `title` |
-| 404  | Task not found             |
-
-## Database
-Tasks are stored in a SQLite database (`tasks.db`), not in memory.
-
-**Why SQLite?** It's a single file with no separate server to install or configure — perfect for a small project like this. Data now survives a server restart instead of being lost every time.
-
-**Where it lives:** `tasks.db` is created automatically the first time the app runs. It's git-ignored, so every fresh clone starts with a clean database — the app seeds 3 example tasks on first run only.
-
-**One example query:**
-```sql
-SELECT COUNT(*) FROM tasks;
-```
-Returned `4` — confirming the 3 seeded tasks plus one created via `POST` were all persisted correctly.
-
-- `title` is required on both create (`POST`) and update (`PUT`); a missing or empty title returns `400`.
-- All queries use parameterized placeholders (`?`) to prevent SQL injection.
-
-## Working Screenshot
-![Swagger UI screenshot](swagger-ui-screenshot.png)
-
-## Database Screenshot
-![DB Browser screenshot](db-browser-screenshot.png)
->>>>>>> 2d4ecea8920ba3cfc65ba2f0450f23dd3b693e9e
