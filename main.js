@@ -6,13 +6,14 @@ init().then(() => {
 }).catch(err => {
     console.error('Failed to initialize database:', err);
 });
+const supabase = require('./supabaseClient');
 
 const express = require('express');
 const app = express();
 const swaggerUi = require('swagger-ui-express');
 const openapiSpec = require('./openapi.json');
 
-app.use(express.json());
+app.use(express.json()); // for req.body
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec));
 
 let tasks = [
@@ -58,6 +59,44 @@ app.post('/tasks', async (req, res) => {
     const { rows } = await pool.query(`INSERT INTO tasks (title, done) VALUES ($1, $2) RETURNING *`, [task.title, false]);
     res.status(201).json(rows[0]);
 });
+
+//signup
+app.post('/auth/signup', async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' })
+    }
+
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+        return res.status(400).json({ error: error.message })
+    }
+
+    res.status(201).json(data)
+})
+
+//login
+app.post('/auth/login', async (req, res) => {
+    const { email, password } = req.body;
+    // email = "test@example.com"
+    // password = "password123"
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' })
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+        return res.status(400).json({ error: error.message })
+    }
+
+    res.status(200).json({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token
+    });
+})
 
 // put(update) task
 app.put('/tasks/:id', async (req, res) => {
