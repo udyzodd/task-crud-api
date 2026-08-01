@@ -7,7 +7,23 @@ init().then(() => {
     console.error('Failed to initialize database:', err);
 });
 const supabase = require('./supabaseClient');
+// auth middleware — verifies the bearer token and attaches the user
+async function authGuard(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ') || !authHeader.split(' ')[1]) {
+        return res.status(401).json({ error: 'Access token required' });
+    }
 
+    const token = authHeader.split(' ')[1];
+    const { data, error } = await supabase.auth.getUser(token);
+
+    if (error || !data.user) {
+        return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+
+    req.user = data.user; // attach the verified user for downstream routes
+    next();
+}
 const express = require('express');
 const app = express();
 const swaggerUi = require('swagger-ui-express');
@@ -16,6 +32,7 @@ const openapiSpec = require('./openapi.json');
 app.use(express.json()); // for req.body
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec));
 
+// to be removed later
 let tasks = [
     { id: 1, title: "Buy milk", done: false },
     { id: 2, title: "Walk the dog", done: true },
@@ -34,7 +51,10 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok' });
 });
 
-
+// protected dashboard
+app.get('/protected/dashboard', authGuard, (req, res) => {
+    res.status(200).json({ message: `Welcome to your dashboard, ${req.user.email}` });
+});
 
 // public info
 app.get('/public/info', (req, res) => {
@@ -42,25 +62,13 @@ app.get('/public/info', (req, res) => {
 });
 
 //protected profile (unverified for now)
-app.get('/protected/profile', async (req, res) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ') || !authHeader.split(' ')[1]) {
-        return res.status(401).json({ error: 'Access token required' });
-    }
-    const token = authHeader.split(' ')[1];
-    const { data, error } = await supabase.auth.getUser(token);
-    if(error || !data.user){
-        return res.status(401).json({ error: 'Invalid or expired token' });
-    }
-
+app.get('/protected/profile', authGuard, (req, res) => {
     res.status(200).json({
-        id: data.user.id,
-        email: data.user.email,
-        created_at: data.user.created_at
+        id: req.user.id,
+        email: req.user.email,
+        created_at: req.user.created_at
     });
-})
-
-
+});
 
 // tasks
 app.get('/tasks', async (req, res) => {
@@ -118,7 +126,7 @@ app.post('/auth/login', async (req, res) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-        return res.status(400).json({ error: error.message })
+        return res.status(401).json({ error: 'Invalid login credentials' });
     }
 
     res.status(200).json({
@@ -126,6 +134,17 @@ app.post('/auth/login', async (req, res) => {
         refresh_token: data.session.refresh_token
     });
 })
+
+//logout
+app.post('/auth/logout', authGuard, async (req, res) => {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+        return res.status(400).json({ error: error.message });
+    }
+
+    res.status(204).send();
+});
 
 // put(update) task
 app.put('/tasks/:id', async (req, res) => {
