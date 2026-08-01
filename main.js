@@ -165,7 +165,7 @@ app.put('/tasks/:id', async (req, res) => {
 // delete task
 app.delete('/tasks/:id', async (req, res) => {
     const id = Number(req.params.id);
-
+    // RETURNING * is used to return the deleted task
     const { rows } = await pool.query(`DELETE FROM tasks WHERE id = $1 RETURNING *`, [id]);
     if (rows.length === 0) {
         return res.status(404).json({ error: `Task ${id} not found` });
