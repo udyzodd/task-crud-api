@@ -33,6 +33,27 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok' });
 });
+
+
+
+// public info
+app.get('/public/info', (req, res) => {
+    res.status(200).json({ message: "Welcome stranger! This info is public." });
+});
+
+//protected profile (unverified for now)
+app.get('/protected/profile', (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ') || !authHeader.split(' ')[1]) {
+        return res.status(401).json({ error: 'Access token required' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    res.status(200).json({ message: 'Token received (not yet verified)', token });
+})
+
+
+
 // tasks
 app.get('/tasks', async (req, res) => {
     const { rows } = await pool.query('SELECT * FROM tasks');
